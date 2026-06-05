@@ -1,5 +1,6 @@
-# Lovely-Haimes 法 + Wu et al. (2013) フィルタ版 設定ファイル
+# Lovely-Haimes 法 + Wu et al. (2013) フィルタ版 設定ファイル (lovely_sensor_filtered.py 用)
 # lovely_sensor_filtered.py と同じディレクトリに置く。
+# 出力: shock_mach フィールド → ParaView で shock_mach=1 の等値線を描くと衝撃波断面が得られる
 
 # ----- 入力 -----
 input_file: null       # null で自動探索 / ファイル名を直接書いても可

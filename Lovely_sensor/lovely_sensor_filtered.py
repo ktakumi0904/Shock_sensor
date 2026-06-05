@@ -17,14 +17,14 @@ Lovely-Haimes 法による衝撃波検知 + Wu et al. (2013) フィルタ版
         衝撃波を通過すると流速が減少するという物理的事実を利用し、
         衝撃波の上流側 (速度未減速) を除去して衝撃波面のみを残す。
 
-出力フィールド (7 つ):
-    normal_mach      : 法線マッハ数 M_n (連続値; 等値線 M_n=1 が衝撃波)
+出力フィールド (6 つ):
+    shock_mach       : 衝撃波断面スカラー場 (検知節点は M_n 値、それ以外は 0)
+                       → ParaView で shock_mach=1 の等値線を描くと衝撃波断面が得られる
     grad_p_mag       : 圧力勾配の大きさ |∇p|
     sound_speed      : 局所音速 a = sqrt(gamma*p/rho)
     v_dot_grad_vmag  : V·∇|V| (Filter 2 の判定値; 符号が重要)
     filter1_pass     : Filter 1 通過フラグ (0/1)
     filter2_pass     : Filter 2 通過フラグ (0/1)
-    shock_mask       : 最終的な衝撃波判定 (0/1)
 
 使い方:
     同じディレクトリに config_filtered.yaml を置いて
@@ -287,12 +287,15 @@ def filtered_sensor(points, cells, u, v, p, rho, cfg):
         filter2 = (v_dot_grad_vmag < 0)
         mask    = mask & filter2
 
+    # 衝撃波断面スカラー場: 検知条件を満たす節点は M_n 値を保持、それ以外は 0
+    # ParaView で shock_mach=1 の等値線を描くと Lovely 法の衝撃波断面が得られる
+    shock_mach = np.where(mask, Mn, 0.0)
+
     return (
-        Mn, grad_p_mag, a,
+        shock_mach, grad_p_mag, a,
         v_dot_grad_vmag,
         filter1.astype(np.int32),
         filter2.astype(np.int32),
-        mask.astype(np.int32),
     )
 
 
@@ -302,17 +305,16 @@ def filtered_sensor(points, cells, u, v, p, rho, cfg):
 def process_one(in_path, cfg):
     mesh, points, u, v, p, rho = load_su2_vtu(in_path)
 
-    Mn, grad_p_mag, a, v_dot_grad_vmag, f1, f2, shock_mask = filtered_sensor(
+    shock_mach, grad_p_mag, a, v_dot_grad_vmag, f1, f2 = filtered_sensor(
         points, mesh.cells, u, v, p, rho, cfg
     )
 
-    mesh.point_data["normal_mach"]      = Mn
+    mesh.point_data["shock_mach"]       = shock_mach
     mesh.point_data["grad_p_mag"]       = grad_p_mag
     mesh.point_data["sound_speed"]      = a
     mesh.point_data["v_dot_grad_vmag"]  = v_dot_grad_vmag
     mesh.point_data["filter1_pass"]     = f1
     mesh.point_data["filter2_pass"]     = f2
-    mesh.point_data["shock_mask"]       = shock_mask
 
     out_path = make_output_path(cfg, in_path)
     meshio.write(out_path, mesh)
@@ -320,16 +322,18 @@ def process_one(in_path, cfg):
     mn_thr = float(cfg["mn_threshold"])
     f1_en  = bool(cfg.get("filter1_enabled", True))
     f2_en  = bool(cfg.get("filter2_enabled", True))
+    detected = (shock_mach > 0).sum()
     print(f"--- {os.path.basename(in_path)} ---")
-    print(f"  節点数             : {len(points)}")
-    print(f"  M_n の範囲          : [{Mn.min():.3f}, {Mn.max():.3f}]")
+    print(f"  節点数              : {len(points)}")
+    print(f"  shock_mach の範囲    : [{shock_mach.min():.3f}, {shock_mach.max():.3f}]")
     if f1_en:
-        print(f"  Filter 1 通過      : {f1.sum()} 節点  (|grad_p| >= eps_f*p/l_n)")
+        print(f"  Filter 1 通過       : {f1.sum()} 節点  (|grad_p| >= eps_f*p/l_n)")
     if f2_en:
-        print(f"  Filter 2 通過      : {f2.sum()} 節点  (V*grad|V| < 0)")
-    print(f"  衝撃波判定節点数    : {shock_mask.sum()}  (M_n>={mn_thr})")
-    print(f"  出力                : {os.path.basename(out_path)}")
-    return Mn, shock_mask
+        print(f"  Filter 2 通過       : {f2.sum()} 節点  (V·∇|V| < 0)")
+    print(f"  衝撃波検知節点数     : {detected}  (M_n>={mn_thr} + フィルタ)")
+    print(f"  出力                 : {os.path.basename(out_path)}")
+    print(f"  → ParaView: shock_mach=1 の等値線で衝撃波断面を表示")
+    return shock_mach
 
 
 # ------------------------------------------------------------------
@@ -340,7 +344,7 @@ def main():
     targets = resolve_input_files(cfg)
     for in_path in targets:
         process_one(in_path, cfg)
-    print("完了 (ParaView で normal_mach / shock_mask / filter1_pass / filter2_pass を可視化)")
+    print("完了 (ParaView で shock_mach=1 の等値線を描いて衝撃波断面を可視化)")
 
 
 if __name__ == "__main__":

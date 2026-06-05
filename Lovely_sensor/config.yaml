@@ -1,6 +1,7 @@
-# Lovely-Haimes 法 衝撃波センサー 設定ファイル
+# Lovely-Haimes 法 衝撃波センサー 設定ファイル (lovely_sensor.py 用)
 # このファイルは lovely_sensor.py と同じディレクトリに置く。
 # 実行は  python lovely_sensor.py  だけで OK。
+# 出力: shock_mach フィールド → ParaView で shock_mach=1 の等値線を描くと衝撃波断面が得られる
 
 # ----- 入力 -----
 # 読み込む .vtu ファイル。
