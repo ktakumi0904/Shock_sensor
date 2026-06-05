@@ -1,0 +1,30 @@
+# Kanamori-Suzuki 衝撃波センサー 設定ファイル
+# このファイルは kanamori_suzuki_sensor.py と同じディレクトリに置く。
+# 実行は  python kanamori_suzuki_sensor.py  だけで OK。
+
+# ----- 入力 -----
+# 読み込む .vtu ファイル。
+#   null (または空) にすると、スクリプトと同じディレクトリの .vtu を自動で探す。
+#   ファイル名を直接書いてもよい (例: "flow.vtu")。
+input_file: null
+
+# 同じディレクトリに .vtu が複数あった場合の挙動:
+#   first : 最初に見つかった 1 つだけ処理
+#   all   : 見つかった全ての .vtu を順に処理
+multiple_files: first
+
+# ----- 物性 -----
+# 比熱比 (空気なら 1.4)。音速 a = sqrt(gamma * p / rho) の計算に使う。
+gamma: 1.4
+
+# ゼロ割回避用の微小量
+eps: 1.0e-12
+
+# ----- 出力 -----
+# 出力ファイル名。
+#   null にすると入力名から自動生成 (例: flow.vtu -> flow_ks.vtu)
+output_file: null
+
+# 注: Kanamori-Suzuki 法は原理的に経験的閾値を必要としない。
+#     そのため Ducros のような threshold 設定は無い。
+#     衝撃波判定は「マッハ線方向の圧力勾配の符号反転 (特性線の収束)」で行う。

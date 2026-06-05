@@ -1,0 +1,35 @@
+# Lovely-Haimes 法 衝撃波センサー 設定ファイル
+# このファイルは lovely_sensor.py と同じディレクトリに置く。
+# 実行は  python lovely_sensor.py  だけで OK。
+
+# ----- 入力 -----
+# 読み込む .vtu ファイル。
+#   null (または空) にすると、スクリプトと同じディレクトリの .vtu を自動で探す。
+#   ファイル名を直接書いてもよい (例: "flow.vtu")。
+input_file: null
+
+# 同じディレクトリに .vtu が複数あった場合の挙動:
+#   first : 最初に見つかった 1 つだけ処理
+#   all   : 見つかった全ての .vtu を順に処理
+multiple_files: first
+
+# ----- センサーのパラメータ -----
+# 比熱比 (空気なら 1.4)。音速 a = sqrt(gamma * p / rho) に使う。
+gamma: 1.4
+
+# 法線マッハ数のしきい値。理論上は 1.0 が衝撃波。
+#   数値解は不連続が鈍るので、0.95 程度に下げて拾うこともある。
+mn_threshold: 1.0
+
+# 膨張波除去フィルタ。
+#   true  : u·∇p > 0 (流れ方向に圧力上昇 = 圧縮) の節点のみ残す → 膨張波を除外
+#   false : 法線マッハ数のしきい値だけで判定
+compression_filter: true
+
+# ゼロ割回避用の微小量
+eps: 1.0e-12
+
+# ----- 出力 -----
+# 出力ファイル名。
+#   null にすると入力名から自動生成 (例: flow.vtu -> flow_lovely.vtu)
+output_file: null
