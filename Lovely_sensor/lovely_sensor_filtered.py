@@ -81,7 +81,7 @@ def resolve_input_files(cfg):
 
     found = sorted(glob.glob(os.path.join(SCRIPT_DIR, "*.vtu")))
     found = [f for f in found if not any(
-        f.endswith(s) for s in ("_lovely.vtu", "_ducros.vtu", "_filtered.vtu")
+        f.endswith(s) for s in ("_lovely.vtu", "_ducros.vtu", "_filtered.vtu", "_lovely_filtered.vtu")
     )]
     if not found:
         raise FileNotFoundError(f"{SCRIPT_DIR} に .vtu ファイルが見つかりません。")
@@ -99,7 +99,7 @@ def make_output_path(cfg, in_path):
         out = cfg["output_file"]
         return out if os.path.isabs(out) else os.path.join(SCRIPT_DIR, out)
     base, _ = os.path.splitext(in_path)
-    return base + "_filtered.vtu"
+    return base + "_lovely_filtered.vtu"
 
 
 # ------------------------------------------------------------------
