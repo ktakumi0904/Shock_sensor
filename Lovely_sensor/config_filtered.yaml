@@ -1,0 +1,31 @@
+# Lovely-Haimes 法 + Wu et al. (2013) フィルタ版 設定ファイル
+# lovely_sensor_filtered.py と同じディレクトリに置く。
+
+# ----- 入力 -----
+input_file: null       # null で自動探索 / ファイル名を直接書いても可
+multiple_files: first  # first: 最初の 1 つのみ / all: 全ファイル処理
+
+# ----- 基本パラメータ -----
+gamma: 1.4      # 比熱比 (空気)
+mn_threshold: 1.0  # 法線マッハ数のしきい値 (理論値 1.0)
+eps: 1.0e-12    # ゼロ割回避
+
+# ----- Filter 1 (Wu et al. 2013, Eq. 18): |∇p| >= eps_f * p / l_n -----
+# 一様流域や数値誤差に起因する偽検知を除去するフィルタ。
+# eps_f が大きいほど厳しく、弱い衝撃波も除外される。
+# eps_f が小さいほど緩く、偽検知が増える可能性がある。
+filter1_enabled: true
+filter1_eps: 0.001   # 論文推奨初期値。弱衝撃波が消える場合は 0.0001 程度に下げる。
+
+# ----- Filter 2 (Wu et al. 2013, Eq. 19): V·∇|V| < 0 -----
+# 衝撃波後方 (速度が減速している側) のみを残すフィルタ。
+# 衝撃波上流側と膨張波を除去する。
+filter2_enabled: true
+
+# ----- 元の圧縮フィルタ (u·∇p > 0) -----
+# Filter 1, 2 で同様の役割を果たすため既定は false。
+# true にすると上記フィルタと AND で適用される。
+compression_filter: false
+
+# ----- 出力 -----
+output_file: null  # null で入力名から自動生成 (例: flow.vtu -> flow_filtered.vtu)
