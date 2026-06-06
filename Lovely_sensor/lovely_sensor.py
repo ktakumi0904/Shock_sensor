@@ -246,7 +246,7 @@ def process_one(in_path, cfg):
     print(f"  節点数              : {len(points)}")
     print(f"  M_n の範囲           : [{Mn.min():.3f}, {Mn.max():.3f}]")
     print(f"  衝撃波検知節点数     : {mask.sum()}  (M_n>={mn_threshold}"
-          f"{', u·∇p>0' if cfg['compression_filter'] else ''})")
+          f"{', u*grad_p>0' if cfg['compression_filter'] else ''})")
     print(f"  出力                 : {os.path.basename(out_path)}")
     print(f"  → ParaView: shock_mach=1 の等値線で衝撃波断面を表示")
     return shock_mach

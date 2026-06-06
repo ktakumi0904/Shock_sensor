@@ -329,7 +329,7 @@ def process_one(in_path, cfg):
     if f1_en:
         print(f"  Filter 1 通過       : {f1.sum()} 節点  (|grad_p| >= eps_f*p/l_n)")
     if f2_en:
-        print(f"  Filter 2 通過       : {f2.sum()} 節点  (V·∇|V| < 0)")
+        print(f"  Filter 2 通過       : {f2.sum()} 節点  (V*grad|V| < 0)")
     print(f"  衝撃波検知節点数     : {detected}  (M_n>={mn_thr} + フィルタ)")
     print(f"  出力                 : {os.path.basename(out_path)}")
     print(f"  → ParaView: shock_mach=1 の等値線で衝撃波断面を表示")
